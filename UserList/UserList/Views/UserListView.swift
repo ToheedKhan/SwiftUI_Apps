@@ -10,7 +10,11 @@
 import SwiftUI
 
 struct UserListView: View {
-    @StateObject private var viewModel = UserListViewModel()
+    @StateObject private var viewModel: UserListViewModel
+    
+    init(viewModel: UserListViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     var body: some View {
         NavigationView {
@@ -31,14 +35,11 @@ struct UserListView: View {
             }
             .navigationTitle("Users")
         }
+        .task {
+            await viewModel.fetchUsers()
+        }
     }
 }
 
- // MARK: - Previews
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        UserListView()
-    }
-}
 
