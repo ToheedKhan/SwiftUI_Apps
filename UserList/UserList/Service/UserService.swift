@@ -11,23 +11,49 @@ import Foundation
 
 enum NetworkError: Error, LocalizedError {
     case invalidURL
-    case requestFailed
-    case decodingFailed
+    case noInternet
+    case timeout
     case serverError(statusCode: Int)
+    case decodingFailed
+    case unknown(Error)
 
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "The URL is invalid."
-        case .requestFailed:
-            return "Network request failed."
+            return "The URL provided was invalid."
+        case .noInternet:
+            return "No internet connection."
+        case .timeout:
+            return "The request timed out."
+        case .serverError(let code):
+            return "Server returned an error (status code: \(code))."
         case .decodingFailed:
             return "Failed to decode the response."
-        case .serverError(let code):
-            return "Server returned an error with status code: \(code)"
+        case .unknown(let error):
+            return "An unknown error occurred: \(error.localizedDescription)"
         }
     }
 }
+
+//enum NetworkError: Error, LocalizedError {
+//    case invalidURL
+//    case requestFailed
+//    case decodingFailed
+//    case serverError(statusCode: Int)
+//
+//    var errorDescription: String? {
+//        switch self {
+//        case .invalidURL:
+//            return "The URL is invalid."
+//        case .requestFailed:
+//            return "Network request failed."
+//        case .decodingFailed:
+//            return "Failed to decode the response."
+//        case .serverError(let code):
+//            return "Server returned an error with status code: \(code)"
+//        }
+//    }
+//}
 
 protocol UserServiceProtocol {
     func fetchUsers() async throws -> [User]
@@ -41,22 +67,61 @@ protocol UserServiceProtocol {
 //    }
 //}
 
+//final class UserService: UserServiceProtocol {
+//    func fetchUsers() async throws -> [User] {
+//        guard let url = URL(string: "https://jsonplaceholder.typicode.com/users") else {
+//            throw NetworkError.invalidURL
+//        }
+//
+//        let (data, response) = try await URLSession.shared.data(from: url)
+//
+//        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+//            throw NetworkError.serverError(statusCode: httpResponse.statusCode)
+//        }
+//
+//        do {
+//            return try JSONDecoder().decode([User].self, from: data)
+//        } catch {
+//            throw NetworkError.decodingFailed
+//        }
+//    }
+//}
+
 final class UserService: UserServiceProtocol {
     func fetchUsers() async throws -> [User] {
         guard let url = URL(string: "https://jsonplaceholder.typicode.com/users") else {
             throw NetworkError.invalidURL
         }
 
-        let (data, response) = try await URLSession.shared.data(from: url)
-
-        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
-            throw NetworkError.serverError(statusCode: httpResponse.statusCode)
-        }
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        let session = URLSession(configuration: config)
 
         do {
-            return try JSONDecoder().decode([User].self, from: data)
+            let (data, response) = try await session.data(from: url)
+
+            if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+                throw NetworkError.serverError(statusCode: httpResponse.statusCode)
+            }
+
+            do {
+                return try JSONDecoder().decode([User].self, from: data)
+            } catch {
+                throw NetworkError.decodingFailed
+            }
+
+        } catch let error as URLError {
+            switch error.code {
+            case .notConnectedToInternet:
+                throw NetworkError.noInternet
+            case .timedOut:
+                throw NetworkError.timeout
+            default:
+                throw NetworkError.unknown(error)
+            }
         } catch {
-            throw NetworkError.decodingFailed
+            throw NetworkError.unknown(error)
         }
     }
 }
+

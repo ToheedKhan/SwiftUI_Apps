@@ -23,6 +23,7 @@ struct UserListView: View {
                     ProgressView("Loading ...")
                 } else if let errorMessage = viewModel.errorMessage {
                     Text("Error : \(errorMessage)").foregroundColor(.red)
+                        .padding()
                 } else {
                     List(viewModel.users) { user in
                         VStack(alignment: .leading) {
