@@ -22,3 +22,13 @@ final class FetchUsersUseCase: FetchUsersUseCaseProtocol {
         return try await repository.getUsers()
     }
 }
+
+// MARK: - Mock Use Case for Previews
+final class MockFetchUsersUseCase: FetchUsersUseCaseProtocol {
+    func execute() async throws -> [User] {
+        return [
+            User(id: 1, name: "John Doe", email: "john@example.com"),
+            User(id: 2, name: "Jane Smith", email: "jane@example.com")
+        ]
+    }
+}

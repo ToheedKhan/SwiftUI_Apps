@@ -41,5 +41,11 @@ struct UserListView: View {
     }
 }
 
-
-
+// MARK: - Previews
+struct UserListView_Previews: PreviewProvider {
+    static var previews: some View {
+        let mockUseCase = MockFetchUsersUseCase()
+        let viewModel = UserListViewModel(fetchUsersUseCase: mockUseCase)
+        return UserListView(viewModel: viewModel)
+    }
+}
