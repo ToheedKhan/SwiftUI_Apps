@@ -16,9 +16,14 @@ final class UserListViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let fetchUsersUseCase: FetchUsersUseCaseProtocol
-
-    init(fetchUsersUseCase: FetchUsersUseCaseProtocol) {
+//To make the mock data appear instantly in preview (without .task):
+    init(fetchUsersUseCase: FetchUsersUseCaseProtocol, preload: Bool = false) {
         self.fetchUsersUseCase = fetchUsersUseCase
+        if preload {
+            Task {
+                await fetchUsers()
+            }
+        }
     }
 
     func fetchUsers() async {

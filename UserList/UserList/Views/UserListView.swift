@@ -45,7 +45,8 @@ struct UserListView: View {
 struct UserListView_Previews: PreviewProvider {
     static var previews: some View {
         let mockUseCase = MockFetchUsersUseCase()
-        let viewModel = UserListViewModel(fetchUsersUseCase: mockUseCase)
+        let viewModel = UserListViewModel(fetchUsersUseCase: mockUseCase, preload: true)
         return UserListView(viewModel: viewModel)
     }
 }
+
