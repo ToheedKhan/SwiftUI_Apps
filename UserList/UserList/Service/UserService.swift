@@ -15,12 +15,15 @@ enum NetworkError: Error, LocalizedError {
     case timeout
     case serverError(statusCode: Int)
     case decodingFailed
+    case requestFailed
     case unknown(Error)
 
     var errorDescription: String? {
         switch self {
         case .invalidURL:
             return "The URL provided was invalid."
+        case .requestFailed:
+            return "Network request failed."
         case .noInternet:
             return "No internet connection."
         case .timeout:
@@ -97,31 +100,48 @@ final class UserService: UserServiceProtocol {
         config.timeoutIntervalForRequest = 10
         let session = URLSession(configuration: config)
 
-        do {
-            let (data, response) = try await session.data(from: url)
+        let maxAttempts = 3
+        var attempt = 0
+        var lastError: Error?
 
-            if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
-                throw NetworkError.serverError(statusCode: httpResponse.statusCode)
-            }
-
+        while attempt < maxAttempts {
             do {
-                return try JSONDecoder().decode([User].self, from: data)
-            } catch {
-                throw NetworkError.decodingFailed
-            }
+                let (data, response) = try await session.data(from: url)
 
-        } catch let error as URLError {
-            switch error.code {
-            case .notConnectedToInternet:
-                throw NetworkError.noInternet
-            case .timedOut:
-                throw NetworkError.timeout
-            default:
+                if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+                    throw NetworkError.serverError(statusCode: httpResponse.statusCode)
+                }
+
+                do {
+                    return try JSONDecoder().decode([User].self, from: data)
+                } catch {
+                    throw NetworkError.decodingFailed
+                }
+
+            } catch let error as URLError {
+                attempt += 1
+                lastError = error
+
+                switch error.code {
+                case .notConnectedToInternet:
+                    throw NetworkError.noInternet
+                case .timedOut:
+                    if attempt >= maxAttempts {
+                        throw NetworkError.timeout
+                    }
+                default:
+                    if attempt >= maxAttempts {
+                        throw NetworkError.unknown(error)
+                    }
+                }
+
+                try await Task.sleep(nanoseconds: UInt64(1_000_000_000 * attempt)) // exponential backoff
+            } catch {
                 throw NetworkError.unknown(error)
             }
-        } catch {
-            throw NetworkError.unknown(error)
         }
+
+        throw lastError ?? NetworkError.requestFailed
     }
 }
 
