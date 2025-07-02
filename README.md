@@ -69,3 +69,14 @@ Test cases for **UserListViewModel**, including:
 | Layer      | File                     | Test                              |
 | ---------- | ------------------------ | --------------------------------- |
 | Use Case   | `FetchUsersUseCaseTests` | Happy path + error handling       |
+
+# UI Test
+
+## Choose Your UI Test Style
+
+| Approach                   | Best For                      | Tools                   |
+| -------------------------- | ----------------------------- | ----------------------- |
+| `UIHostingController` test | Basic rendering + no crash    | `XCTestCase`            |
+| Snapshot testing           | Pixel-perfect regression      | `SnapshotTesting` (SPM) |
+| `XCUITest`                 | Real device/user interactions | Xcode UI Test Bundle    |
+
