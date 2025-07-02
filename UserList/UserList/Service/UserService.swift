@@ -145,3 +145,22 @@ final class UserService: UserServiceProtocol {
     }
 }
 
+// For Pagination
+//final class UserService: UserServiceProtocol {
+//    func fetchUsers() async throws -> [User] {
+//        let url = URL(string: "https://jsonplaceholder.typicode.com/users")!
+//        let (data, _) = try await URLSession.shared.data(from: url)
+//        let baseUsers = try JSONDecoder().decode([User].self, from: data)
+//
+//        // Simulate 50 users by duplicating with new IDs
+//        var users: [User] = []
+//        for i in 0..<5 {
+//            let newBatch = baseUsers.map { user in
+//                User(id: user.id + (i * 10), name: "\(user.name) \(i)", email: user.email)
+//            }
+//            users.append(contentsOf: newBatch)
+//        }
+//
+//        return users
+//    }
+//}

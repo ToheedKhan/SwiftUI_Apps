@@ -11,33 +11,45 @@ import SwiftUI
 
 struct UserListView: View {
     @StateObject private var viewModel: UserListViewModel
-    
+
     init(viewModel: UserListViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     var body: some View {
         NavigationView {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView("Loading ...")
-                } else if let errorMessage = viewModel.errorMessage {
-                    Text("Error : \(errorMessage)").foregroundColor(.red)
-                        .padding()
+            List {
+                if viewModel.isLoading && viewModel.users.isEmpty {
+                    ProgressView("Loading...")
                 } else {
-                    List(viewModel.users) { user in
+                    ForEach(viewModel.users) { user in
                         VStack(alignment: .leading) {
                             Text(user.name).font(.headline)
                             Text(user.email).font(.subheadline).foregroundColor(.gray)
                         }
-//                        Text("\(user.name) (\(user.email))")
+                    }
+                }
+
+                if viewModel.isPaginating {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
                     }
                 }
             }
+            .refreshable {
+                await viewModel.refreshUsers()
+            }
+            .onAppear {
+                if viewModel.users.isEmpty {
+                    Task { await viewModel.fetchUsers() }
+                }
+            }
+            .onAppear {
+                UITableView.appearance().keyboardDismissMode = .onDrag
+            }
             .navigationTitle("Users")
-        }
-        .task {
-            await viewModel.fetchUsers()
         }
     }
 }
