@@ -82,7 +82,7 @@ final class UserListViewModel: ObservableObject {
             FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(cacheFile)
         }
 
-        private func saveUsersToCache(_ users: [User]) {
+        func saveUsersToCache(_ users: [User]) {
             guard let url = cacheURL() else { return }
             do {
                 let data = try JSONEncoder().encode(users)
@@ -92,7 +92,7 @@ final class UserListViewModel: ObservableObject {
             }
         }
 
-        private func loadCachedUsers() {
+        func loadCachedUsers() {
             guard let url = cacheURL(), let data = try? Data(contentsOf: url) else { return }
             do {
                 let cachedUsers = try JSONDecoder().decode([User].self, from: data)
