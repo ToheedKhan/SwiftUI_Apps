@@ -80,3 +80,5 @@ Test cases for **UserListViewModel**, including:
 | Snapshot testing           | Pixel-perfect regression      | `SnapshotTesting` (SPM) |
 | `XCUITest`                 | Real device/user interactions | Xcode UI Test Bundle    |
 
+# CI/CD
+Coming soon...
