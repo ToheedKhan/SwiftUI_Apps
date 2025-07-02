@@ -55,3 +55,17 @@ Test cases for **UserListViewModel**, including:
 | `testLoadMoreUsersIfNeeded`  | Pagination appends users           |
 | `testSaveAndLoadCachedUsers` | File-based caching works correctly |
 
+## UserService (Networking Layer)
+| Layer      | File                     | Test                              |
+| ---------- | ------------------------ | --------------------------------- |
+| Service    | `UserServiceTests`       | API call success/failure          |
+
+## UserRepositoryTests (Domain Logic Layer)
+| Layer      | File                     | Test                              |
+| ---------- | ------------------------ | --------------------------------- |
+| Repository | `UserRepositoryTests`    | Data from service, error handling  |
+
+## FetchUsersUseCase (UseCase Layer)
+| Layer      | File                     | Test                              |
+| ---------- | ------------------------ | --------------------------------- |
+| Use Case   | `FetchUsersUseCaseTests` | Happy path + error handling       |

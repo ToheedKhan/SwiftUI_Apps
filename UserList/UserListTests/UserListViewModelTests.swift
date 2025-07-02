@@ -5,7 +5,6 @@
 //  Created by Toheed Khan on 02/07/25.
 //
 
-import Foundation
 import XCTest
 @testable import UserList
 
