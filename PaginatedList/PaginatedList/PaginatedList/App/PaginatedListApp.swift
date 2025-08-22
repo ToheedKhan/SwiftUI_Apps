@@ -11,7 +11,7 @@ import SwiftUI
 struct PaginatedListApp: App {
     var body: some Scene {
         WindowGroup {
-            ItemListView()
+            ItemsListView()
         }
     }
 }
