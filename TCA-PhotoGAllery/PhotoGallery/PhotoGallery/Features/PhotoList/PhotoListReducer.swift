@@ -18,7 +18,7 @@ struct PhotoListReducer: Reducer {
     // This is shared type used by State and Actions.
     enum ThemeMode: String, Equatable, CaseIterable {
         case automatic, dark, light
-    
+        
         var colorScheme: ColorScheme? {
             switch self {
             case .automatic: return nil
@@ -59,6 +59,8 @@ struct PhotoListReducer: Reducer {
         
         // Action to handle showing a photo's details.
         case showPhotoDetails(photo: Photo)
+        
+        case dismissPhotoDetails
     }
     
     // MARK: Dependencies
@@ -129,11 +131,16 @@ struct PhotoListReducer: Reducer {
             return .run { _ in
                 self.userDefaultsClient.set(Self.themeKey, theme.rawValue)
             }
-
             
-        case let .showPhotoDetails(photo):
+            
+        case .showPhotoDetails(let photo):
             state.selectedPhoto = photo
             return .none
+            
+        case .dismissPhotoDetails:
+            state.selectedPhoto = nil     //  clear selection
+            return .none
         }
+        
     }
 }

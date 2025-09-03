@@ -29,23 +29,40 @@ struct PhotoListView: View {
                             ForEach(viewStore.photos) {
                                 photo in
                                 
-                                VStack(
-                                    alignment: .leading,
-                                    spacing: 8) {
-                                        AsyncImage(url: URL(string: photo.url)) { image in
-                                            image.resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                                .cornerRadius(8)
-                                        } placeholder: {
-                                            ProgressView()
-                                                .frame(height: 200)
+                                NavigationLink(
+                                    destination: PhotoDetailView(photo: photo),
+                                    tag: photo.id,   // use id, which is Hashable
+                                    selection: viewStore.binding(
+                                        get: { $0.selectedPhoto?.id },
+                                        send: { id in
+                                            if let id = id {
+                                                // find photo by id
+                                                if let selected = viewStore.photos.first(where: { $0.id == id }) {
+                                                    return .showPhotoDetails(photo: selected)
+                                                }
+                                            }
+                                            return .dismissPhotoDetails
                                         }
-                                        Text(photo.title)
-                                            .font(.headline)
-                                        Text(photo.description)
-                                            .font(.subheadline)
-                                    }
-                                    .padding(.vertical, 8)
+                                    )
+                                ) {
+                                    VStack(
+                                        alignment: .leading,
+                                        spacing: 8) {
+                                            AsyncImage(url: URL(string: photo.url)) { image in
+                                                image.resizable()
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .cornerRadius(8)
+                                            } placeholder: {
+                                                ProgressView()
+                                                    .frame(height: 200)
+                                            }
+                                            Text(photo.title)
+                                                .font(.headline)
+                                            Text(photo.description)
+                                                .font(.subheadline)
+                                        }
+                                        .padding(.vertical, 8)
+                                }//: NAVIGATION LINK
                             }
                         }
                     }//: ELSE
