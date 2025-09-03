@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Data Models
-struct Photo: Identifiable, Decodable, Equatable {
+struct Photo: Identifiable, Decodable, Equatable, Hashable {
     let id: Int
     let url: String
     let title: String

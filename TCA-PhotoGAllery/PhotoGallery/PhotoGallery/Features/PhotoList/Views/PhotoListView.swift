@@ -28,23 +28,8 @@ struct PhotoListView: View {
                         List {
                             ForEach(viewStore.photos) {
                                 photo in
-                                
-                                NavigationLink(
-                                    destination: PhotoDetailView(photo: photo),
-                                    tag: photo.id,   // use id, which is Hashable
-                                    selection: viewStore.binding(
-                                        get: { $0.selectedPhoto?.id },
-                                        send: { id in
-                                            if let id = id {
-                                                // find photo by id
-                                                if let selected = viewStore.photos.first(where: { $0.id == id }) {
-                                                    return .showPhotoDetails(photo: selected)
-                                                }
-                                            }
-                                            return .dismissPhotoDetails
-                                        }
-                                    )
-                                ) {
+
+                                NavigationLink(value: photo) {
                                     VStack(
                                         alignment: .leading,
                                         spacing: 8) {
@@ -64,6 +49,9 @@ struct PhotoListView: View {
                                         .padding(.vertical, 8)
                                 }//: NAVIGATION LINK
                             }
+                        } //: LIST
+                        .navigationDestination(for: Photo.self) { photo in
+                            PhotoDetailView(photo: photo)
                         }
                     }//: ELSE
                 }//: VSTACK

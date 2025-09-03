@@ -58,9 +58,13 @@ struct PhotoListReducer: Reducer {
         case setTheme(ThemeMode)
         
         // Action to handle showing a photo's details.
-        case showPhotoDetails(photo: Photo)
+//        case showPhotoDetails(photo: Photo)
+//        
+//        case dismissPhotoDetails
         
-        case dismissPhotoDetails
+        /*
+         modern NavigationStack with NavigationLink(value:) + .navigationDestination(for:), we no longer need to manually track selectedPhoto in state or reducer. SwiftUI handles navigation state by value.
+         */
     }
     
     // MARK: Dependencies
@@ -133,13 +137,13 @@ struct PhotoListReducer: Reducer {
             }
             
             
-        case .showPhotoDetails(let photo):
-            state.selectedPhoto = photo
-            return .none
-            
-        case .dismissPhotoDetails:
-            state.selectedPhoto = nil     //  clear selection
-            return .none
+//        case .showPhotoDetails(let photo):
+//            state.selectedPhoto = photo
+//            return .none
+//            
+//        case .dismissPhotoDetails:
+//            state.selectedPhoto = nil     //  clear selection
+//            return .none
         }
         
     }
