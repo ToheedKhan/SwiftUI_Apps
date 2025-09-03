@@ -14,6 +14,14 @@ struct PhotoListReducer: Reducer {
     typealias State = PhotoListState
     typealias Action = PhotoListAction
     
+    // MARK: Properties
+    //    let photosClient: PhotosClient
+    //    let userDefaultsClient: UserDefaultsClient
+
+    
+    @Dependency(PhotosClient.self) var photosClient
+    @Dependency(UserDefaultsClient.self) var userDefaultsClient
+    
     // MARK: - A dedicated enum for theme mode
     // This is shared type used by State and Actions.
     enum ThemeMode: String, Equatable, CaseIterable {
@@ -98,9 +106,6 @@ struct PhotoListReducer: Reducer {
         )
     }
     
-    // MARK: Properties
-    let photosClient: PhotosClient
-    let userDefaultsClient: UserDefaultsClient
     
     private static let themeKey = "themeMode"
     
@@ -133,7 +138,7 @@ struct PhotoListReducer: Reducer {
         case let .setTheme(theme):
             state.themeMode = theme
             return .run { _ in
-                self.userDefaultsClient.set(Self.themeKey, theme.rawValue)
+                userDefaultsClient.set(Self.themeKey, theme.rawValue)
             }
             
             
