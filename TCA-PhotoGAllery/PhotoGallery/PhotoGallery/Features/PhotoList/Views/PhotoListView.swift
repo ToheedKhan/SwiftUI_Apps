@@ -28,18 +28,32 @@ struct PhotoListView: View {
                         List {
                             ForEach(viewStore.photos) {
                                 photo in
-
+                                
                                 NavigationLink(value: photo) {
                                     VStack(
                                         alignment: .leading,
                                         spacing: 8) {
-                                            AsyncImage(url: URL(string: photo.url)) { image in
-                                                image.resizable()
+                                            if photo.url.hasPrefix("local:") {
+                                                let assetName = photo.url.replacingOccurrences(of: "local:", with: "")
+                                                    Image(
+                                                    assetName
+                                                )
+                                                    .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .cornerRadius(8)
-                                            } placeholder: {
-                                                ProgressView()
-                                                    .frame(height: 200)
+                                            } else {
+                                                AsyncImage(url: URL(string: photo.url)) { image in
+                                                    image.resizable()
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .cornerRadius(8)
+                                                } placeholder: {
+                                                    ProgressView()
+                                                        .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200, alignment: .center)
+//                                                        .frame(maxWidth: .infinity, alignment: .center)
+                                                        .padding()
+                                                        .background(Color.gray.opacity(0.1))
+                                                        .cornerRadius(8)
+                                                }
                                             }
                                             Text(photo.title)
                                                 .font(.headline)
@@ -78,24 +92,56 @@ struct PhotoListView: View {
 
 struct PhotoListView_Previews: PreviewProvider {
     static var previews: some View {
-        PhotoListView(
-            store: Store(
-                initialState: PhotoListReducer.State(
-                    photos: [
-                        Photo(id: 1, url: "", title: "Sample 1", description: "Desc 1"),
-                        Photo(id: 2, url: "", title: "Sample 2", description: "Desc 2")
-                    ],
-                    isLoading: false,
-                    themeMode: .automatic
-                ),
-                reducer: {
-                    PhotoListReducer(
-                        photosClient: .test,
-                        userDefaultsClient: .test
-                    )
+        Group {
+            // MARK: Preview using testValue
+            PhotoListView(
+                store: Store(
+                    initialState: PhotoListReducer.State(
+                        photos: [
+                            Photo(id: 1, url: "", title: "Sample 1", description: "Desc 1"),
+                            Photo(id: 2, url: "", title: "Sample 2", description: "Desc 2")
+                        ],
+                        isLoading: false,
+                        themeMode: .automatic
+                    ),
+                    reducer: { PhotoListReducer() }
+                ) {
+                    // built-in TCA test values
+                    $0.photosClient = .testValue
+                    $0.userDefaultsClient = .testValue
                 }
             )
-        )
-        .previewDisplayName("Photo List Preview")
+            .previewDisplayName("Photo List (testValue)")
+            
+            // MARK: Preview using mock
+            PhotoListView(
+                store: Store(
+                    initialState: PhotoListReducer.State(),
+                    reducer: { PhotoListReducer() }
+                ) {
+                    // custom mocks from Mocks.swift
+                    $0.photosClient = .mock
+                    $0.userDefaultsClient = .mock
+                }
+            )
+            .previewDisplayName("Photo List (mock)")
+        }
     }
 }
+
+
+
+
+/*
+ Key Difference
+ 
+ .testValue: Provided automatically when your dependency conforms to TestDependencyKey. Usually returns empty/fake values.
+ 
+ .mock: You define yourself (in Mocks.swift), so you can fill with realistic sample data for previews.
+ 
+ Best practice:
+ 
+ Use .mock in previews (so you see data).
+ 
+ Use .testValue in unit tests (deterministic, no assumptions).
+ */

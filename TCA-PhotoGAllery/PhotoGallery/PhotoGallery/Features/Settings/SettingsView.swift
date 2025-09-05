@@ -42,33 +42,31 @@ struct SettingsView: View {
 //#Preview {
 //    SettingsView()
 //}
+import SwiftUI
+import ComposableArchitecture
+
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView(
-            store: Store(
-                initialState: PhotoListReducer.PhotoListState(themeMode: .light), // mock state
-                reducer: {
-                    PhotoListReducer(
-                        photosClient: .test,
-                        userDefaultsClient: .test
-                    )
+        Group {
+            SettingsView(
+                store: Store(
+                    initialState: PhotoListReducer.State(themeMode: .light),
+                    reducer: { PhotoListReducer() }
+                ) {
+                    $0.userDefaultsClient = .testValue
                 }
             )
-        )
-        .previewDisplayName("Light Mode")
-        
-        SettingsView(
-            store: Store(
-                initialState: PhotoListReducer.PhotoListState(themeMode: .dark), // mock state
-                reducer: {
-                    PhotoListReducer(
-                        photosClient: .test,
-                        userDefaultsClient: .test
-                    )
+            .previewDisplayName("Light Mode")
+            
+            SettingsView(
+                store: Store(
+                    initialState: PhotoListReducer.State(themeMode: .dark),
+                    reducer: { PhotoListReducer() }
+                ) {
+                    $0.userDefaultsClient = .mock
                 }
             )
-        )
-        .previewDisplayName("Dark Mode")
+            .previewDisplayName("Dark Mode")
+        }
     }
 }
-

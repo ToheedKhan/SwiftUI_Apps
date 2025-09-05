@@ -15,15 +15,18 @@ struct PhotoGalleryApp: App {
             PhotoListView(
                 store: Store(
                     initialState: PhotoListReducer.State(),
-                    reducer: {
-                        PhotoListReducer(
-                            photosClient: .live,
-                            userDefaultsClient: .live
-                        )
-                    }
-                )
+                    reducer: { PhotoListReducer() }
+                ) {
+                    $0.photosClient = .liveValue
+                    $0.userDefaultsClient = .liveValue
+                }
             )
         }
     }
 }
+
+
+
+
+
 

@@ -11,16 +11,9 @@ import ComposableArchitecture
 
 struct PhotoListReducer: Reducer {
     
-    typealias State = PhotoListState
-    typealias Action = PhotoListAction
+//    typealias State = PhotoListState
+//    typealias Action = PhotoListAction
     
-    // MARK: Properties
-    //    let photosClient: PhotosClient
-    //    let userDefaultsClient: UserDefaultsClient
-
-    
-    @Dependency(PhotosClient.self) var photosClient
-    @Dependency(UserDefaultsClient.self) var userDefaultsClient
     
     // MARK: - A dedicated enum for theme mode
     // This is shared type used by State and Actions.
@@ -38,12 +31,21 @@ struct PhotoListReducer: Reducer {
     
     // MARK: State
     // Defines the data for our feature.
-    struct PhotoListState: Equatable {
+    
+    /*
+     In TCA 1.x, your State must conform to ObservableState so that SwiftUI views (via WithViewStore) can observe it properly.
+     
+     Newer TCA versions (1.10+), ObservableState expects a special @ObservableState macro annotation
+     */
+//    struct PhotoListState: Equatable, ObservableState {
+    
+    @ObservableState
+    struct State: Equatable {
         var photos: [Photo] = []
         var isLoading = false
         var errorMessage: String?
         var themeMode: ThemeMode = .automatic
-        var selectedPhoto: Photo?
+//        var selectedPhoto: Photo?
     }
     
     // MARK: Action
@@ -56,7 +58,7 @@ struct PhotoListReducer: Reducer {
      
      System events, like when the view first appears (onAppear) or when a network request is completed (fetchPhotosResponse).
      */
-    enum PhotoListAction: Equatable {
+    enum Action: Equatable {
         // Sent when the view appears to start the network call.
         case onAppear
         // Sent with the result of the network call.
@@ -76,41 +78,13 @@ struct PhotoListReducer: Reducer {
     }
     
     // MARK: Dependencies
-    struct PhotosClient {
-        var fetchPhotos: @Sendable () async throws -> [Photo]
-        
-        static let live = PhotosClient(
-            fetchPhotos: {
-                let url = URL(string: "https://api.slingacademy.com/v1/sample-data/photos?offset=0&limit=20")!
-                let (data, _) = try await URLSession.shared.data(from: url)
-                let decoded = try JSONDecoder().decode(PhotosData.self, from: data)
-                return decoded.photos
-            }
-        )
-        
-        static let test = PhotosClient(fetchPhotos: { [] })
-    }
-    
-    struct UserDefaultsClient {
-        var set: @Sendable (String, String) -> Void
-        var get: @Sendable (String) -> String?
-        
-        static let live = UserDefaultsClient(
-            set: { key, value in UserDefaults.standard.set(value, forKey: key) },
-            get: { key in UserDefaults.standard.string(forKey: key) }
-        )
-        
-        static let test = UserDefaultsClient(
-            set: { _, _ in },
-            get: { _ in "automatic" }
-        )
-    }
-    
+    @Dependency(PhotosClient.self) var photosClient
+    @Dependency(UserDefaultsClient.self) var userDefaultsClient
     
     private static let themeKey = "themeMode"
     
     // MARK: Reducer
-    func reduce(into state: inout PhotoListState, action: PhotoListAction) -> Effect<PhotoListAction> {
+    func reduce(into state: inout State, action: Action) -> Effect<Action> {
         switch action {
         case .onAppear:
             if let savedThemeString = userDefaultsClient.get(Self.themeKey),

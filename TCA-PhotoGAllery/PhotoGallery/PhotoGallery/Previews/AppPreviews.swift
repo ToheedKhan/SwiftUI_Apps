@@ -11,83 +11,65 @@ import ComposableArchitecture
 struct AppPreviews: PreviewProvider {
     static var previews: some View {
         Group {
-            // PhotoListView Light
-            PhotoListView(
-                store: Store(
-                    initialState: PhotoListReducer.State(
-                        photos: [
-                            Photo(id: 1, url: "", title: "Sample 1", description: "Desc 1"),
-                            Photo(id: 2, url: "", title: "Sample 2", description: "Desc 2")
-                        ],
-                        isLoading: false,
-                        themeMode: .light
-                    ),
-                    reducer: {
-                        PhotoListReducer(
-                        photosClient: .test,
-                        userDefaultsClient: .test
-                     )
-                    }
-                )
-            )
-            .previewDisplayName("📸 Photo List (Light)")
-            .preferredColorScheme(.light)
+            //PhotoListView Light
             
-            // PhotoListView Dark
+            PhotoListView(
+                store: Store(initialState: PhotoListReducer.State(), reducer: {
+                    PhotoListReducer()
+                }) {
+                    $0.photosClient = .mockWithLocal
+                    $0.userDefaultsClient = .mock
+                }
+            ) .previewDisplayName("Photo List (mock)")
+                .preferredColorScheme(.light)
+            
+            
             PhotoListView(
                 store: Store(
-                    initialState: PhotoListReducer.State(
-                        photos: [
-                            Photo(id: 1, url: "", title: "Sample 1", description: "Desc 1"),
-                            Photo(id: 2, url: "", title: "Sample 2", description: "Desc 2")
-                        ],
-                        isLoading: false,
-                        themeMode: .dark
-                    ),
+                    initialState: PhotoListReducer.State(),
                     reducer: {
-                        PhotoListReducer(
-                            photosClient: .test,
-                            userDefaultsClient: .test
-                        )
+                        PhotoListReducer()
+                    },
+                    withDependencies: { deps in
+                        deps.photosClient = .mock
+                        deps.userDefaultsClient = .mock
                     }
                 )
-            )
-            .previewDisplayName("📸 Photo List (Dark)")
-            .preferredColorScheme(.dark)
+            ).previewDisplayName("Photo List (mock - Dark)")
+                .preferredColorScheme(.dark)
+            
             
             // SettingsView Light
+            
             NavigationStack {
                 SettingsView(
                     store: Store(
                         initialState: PhotoListReducer.State(themeMode: .light),
                         reducer: {
-                            PhotoListReducer(
-                                photosClient: .test,
-                                userDefaultsClient: .test
-                            )
+                            PhotoListReducer()
                         }
-                    )
+                    ) {
+                        $0.userDefaultsClient = .testValue
+                    }
                 )
-            }
-            .previewDisplayName("⚙️ Settings (Light)")
-            .preferredColorScheme(.light)
+            }.previewDisplayName(" Settings (Light)")
+                .preferredColorScheme(.light)
             
             // SettingsView Dark
+            
             NavigationStack {
                 SettingsView(
                     store: Store(
                         initialState: PhotoListReducer.State(themeMode: .dark),
                         reducer: {
-                            PhotoListReducer(
-                                photosClient: .test,
-                                userDefaultsClient: .test
-                            )
+                            PhotoListReducer()
                         }
-                    )
+                    ) {
+                        $0.userDefaultsClient = .mock
+                    }
                 )
-            }
-            .previewDisplayName("⚙️ Settings (Dark)")
-            .preferredColorScheme(.dark)
-        }
+            }.previewDisplayName(" Settings (Dark)")
+                .preferredColorScheme(.dark)
+        }//: GROUP
     }
 }
